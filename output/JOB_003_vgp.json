@@ -1,0 +1,54 @@
+{
+  "job_id": "JOB_003",
+  "topic": "Newton's Laws of Motion",
+  "domain": "Physics",
+  "domain_confidence": 0.97,
+  "status": "COMPLETED",
+  "scenes": [
+    {
+      "scene_id": 1,
+      "title": "Introduction to Newton's Laws",
+      "explanation": "Newton's Laws of Motion are three fundamental principles that describe the relationship between a body and the forces acting upon it.",
+      "narration": "Welcome to our video on Newton's Laws of Motion. In this video, we will explore the three laws that govern how objects move and respond to forces.",
+      "visual_prompt": "A simple diagram of an object on a frictionless surface with a few arrows representing forces.",
+      "duration": 10
+    },
+    {
+      "scene_id": 2,
+      "title": "First Law: Inertia",
+      "explanation": "The First Law states that an object at rest will remain at rest, and an object in motion will continue to move, unless acted upon by an external force.",
+      "narration": "The First Law, also known as the law of inertia, states that an object will maintain its state of motion unless a force is applied to it.",
+      "visual_prompt": "An animation of a ball rolling on a flat surface, with a red arrow indicating the force applied.",
+      "duration": 12
+    },
+    {
+      "scene_id": 3,
+      "title": "Second Law: Force and Acceleration",
+      "explanation": "The Second Law states that the force applied to an object is equal to the mass of the object multiplied by its acceleration.",
+      "narration": "The Second Law states that the force applied to an object is equal to the mass of the object multiplied by its acceleration.",
+      "visual_prompt": "A diagram of a car accelerating on a straight road, with arrows representing the force and acceleration.",
+      "duration": 10
+    },
+    {
+      "scene_id": 4,
+      "title": "Third Law: Action and Reaction",
+      "explanation": "The Third Law states that every action has an equal and opposite reaction.",
+      "narration": "The Third Law states that every action has an equal and opposite reaction.",
+      "visual_prompt": "An animation of two objects interacting, with arrows representing the forces and reactions.",
+      "duration": 12
+    },
+    {
+      "scene_id": 5,
+      "title": "Conclusion",
+      "explanation": "In conclusion, Newton's Laws of Motion provide a fundamental understanding of how objects move and respond to forces.",
+      "narration": "In conclusion, we have explored the three laws of motion that govern how objects move and respond to forces.",
+      "visual_prompt": "A summary diagram of the three laws, with a green checkmark indicating that they have been understood.",
+      "duration": 8
+    }
+  ],
+  "metadata": {
+    "language": "English",
+    "created_by": "Member2"
+  },
+  "errors": []
+}

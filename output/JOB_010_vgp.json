@@ -1,0 +1,62 @@
+{
+  "job_id": "JOB_010",
+  "topic": "Chemical Bonding",
+  "domain": "Chemistry",
+  "domain_confidence": 0.95,
+  "status": "COMPLETED",
+  "scenes": [
+    {
+      "scene_id": 1,
+      "title": "What is Chemical Bonding?",
+      "explanation": "Chemical bonding is the attractive and repulsive forces between atoms that hold them together in a molecule.",
+      "narration": "Chemical bonding is the attractive and repulsive forces between atoms that hold them together in a molecule.",
+      "visual_prompt": "A simple 2D illustration of two atoms with electrons orbiting around them, connected by a spring",
+      "duration": 8
+    },
+    {
+      "scene_id": 2,
+      "title": "Types of Chemical Bonds",
+      "explanation": "There are three main types of chemical bonds: ionic, covalent, and metallic bonds.",
+      "narration": "There are three main types of chemical bonds: ionic, covalent, and metallic bonds.",
+      "visual_prompt": "An illustration of an ionic bond, a covalent bond, and a metallic bond, with simple diagrams and labels",
+      "duration": 10
+    },
+    {
+      "scene_id": 3,
+      "title": "Electron Sharing and Attraction",
+      "explanation": "Chemical bonds are formed when atoms share or exchange electrons to achieve a stable electronic configuration.",
+      "narration": "Chemical bonds are formed when atoms share or exchange electrons to achieve a stable electronic configuration.",
+      "visual_prompt": "An illustration of electron sharing between two atoms, with arrows showing electron flow",
+      "duration": 12
+    },
+    {
+      "scene_id": 4,
+      "title": "Polar and Nonpolar Covalent Bonds",
+      "explanation": "Polar covalent bonds have a partial positive charge on one atom and a partial negative charge on another.",
+      "narration": "Polar covalent bonds have a partial positive charge on one atom and a partial negative charge on another.",
+      "visual_prompt": "An illustration of a polar covalent bond with an arrow showing the direction of electron flow",
+      "duration": 10
+    },
+    {
+      "scene_id": 5,
+      "title": "Chemical Bonding in Practice",
+      "explanation": "Understanding chemical bonding helps us explain the properties and behavior of molecules in everyday life.",
+      "narration": "Understanding chemical bonding helps us explain the properties and behavior of molecules in everyday life.",
+      "visual_prompt": "An illustration of a molecule with bonds labeled, surrounded by simple diagrams of everyday objects that use those molecules",
+      "duration": 12
+    },
+    {
+      "scene_id": 6,
+      "title": "Conclusion",
+      "explanation": "Chemical bonding is a fundamental concept in chemistry that helps us understand the behavior of atoms and molecules.",
+      "narration": "Chemical bonding is a fundamental concept in chemistry that helps us understand the behavior of atoms and molecules.",
+      "visual_prompt": "A simple 2D illustration of a molecule with the words \"Chemical Bonding\" written above it",
+      "duration": 8
+    }
+  ],
+  "metadata": {
+    "language": "English",
+    "created_by": "Member2"
+  },
+  "errors": []
+}

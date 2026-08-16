@@ -1,0 +1,27 @@
+# Python virtual environment
+venv/
+.venv/
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# VS Code
+.vscode/
+
+# Local environment/secrets
+.env
+.env.*
+
+# Ollama/local model files
+*.gguf
+
+# Temporary files
+*.tmp
+*.log
+
+# OS files
+.DS_Store
+Thumbs.db

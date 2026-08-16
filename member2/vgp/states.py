@@ -1,0 +1,15 @@
+from enum import Enum
+
+
+class VGPStatus(str, Enum):
+
+    CREATED = "CREATED"
+    VALIDATED = "VALIDATED"
+    PROCESSING = "PROCESSING"
+    COMPLETED = "COMPLETED"
+
+    FAILED = "FAILED"
+    RETRY = "RETRY"
+    TIMEOUT = "TIMEOUT"
+    PARTIAL = "PARTIAL"
+    ABORTED = "ABORTED"

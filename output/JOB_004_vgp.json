@@ -1,0 +1,54 @@
+{
+  "job_id": "JOB_004",
+  "topic": "Chemical Bonding",
+  "domain": "Chemistry",
+  "domain_confidence": 1.0,
+  "status": "COMPLETED",
+  "scenes": [
+    {
+      "scene_id": 1,
+      "title": "What is a Chemical Bond?",
+      "explanation": "A chemical bond is an attractive and holding force between two atoms, which is the result of the interaction between their electrons.",
+      "narration": "A chemical bond is a connection between two atoms that holds them together.",
+      "visual_prompt": "An illustration of two atoms with electrons orbiting around them, forming a bond between them.",
+      "duration": 8
+    },
+    {
+      "scene_id": 2,
+      "title": "Types of Chemical Bonds",
+      "explanation": "There are several types of chemical bonds, including covalent bonds, ionic bonds, and metallic bonds.",
+      "narration": "Chemical bonds come in different types, including covalent bonds, ionic bonds, and metallic bonds.",
+      "visual_prompt": "An illustration of a covalent bond, an ionic bond, and a metallic bond, with arrows showing the direction of the bond.",
+      "duration": 10
+    },
+    {
+      "scene_id": 3,
+      "title": "Electronegativity and Polarity",
+      "explanation": "Electronegativity is a measure of an atom's ability to attract electrons in a bond. Polarity occurs when the electrons are shared unequally between atoms.",
+      "narration": "Electronegativity helps determine how strongly an atom pulls electrons towards itself.",
+      "visual_prompt": "An illustration of an atom with a negative charge and another atom with a positive charge, showing the unequal sharing of electrons.",
+      "duration": 12
+    },
+    {
+      "scene_id": 4,
+      "title": "Bonding in Compounds",
+      "explanation": "Compounds are formed when atoms share electrons to form bonds. The type of bond and the number of atoms involved determine the properties of the compound.",
+      "narration": "Compounds are formed when atoms share electrons to create bonds.",
+      "visual_prompt": "An illustration of two atoms sharing electrons to form a covalent bond, with a compound in the background.",
+      "duration": 10
+    },
+    {
+      "scene_id": 5,
+      "title": "Breaking and Forming Bonds",
+      "explanation": "Bonds can be broken and formed through chemical reactions. The energy required to break a bond is called the bond dissociation energy.",
+      "narration": "Bonds can be broken and formed through chemical reactions, requiring energy.",
+      "visual_prompt": "An illustration of a bond being broken and formed, with energy being released or absorbed.",
+      "duration": 12
+    }
+  ],
+  "metadata": {
+    "language": "English",
+    "created_by": "Member2"
+  },
+  "errors": []
+}
