@@ -26,11 +26,17 @@ __pycache__/
 .DS_Store
 Thumbs.db
 
-# Media generator environment
+# Virtual environments
+venv/
+.venv/
+
+# Environment variables / secrets
 .env
 
+# Media generator output
+modules/media_generator/output/
+
 # Generated media
-output/
 *.png
 *.jpg
 *.jpeg
@@ -42,4 +48,3 @@ output/
 *.safetensors
 *.ckpt
 *.pth
-*.bin
