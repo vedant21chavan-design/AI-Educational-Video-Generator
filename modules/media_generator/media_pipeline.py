@@ -1,74 +1,58 @@
 import os
-import sys
-
-
-# --------------------------------------------------
-# PROJECT ROOT
-# --------------------------------------------------
-
-PROJECT_ROOT = os.path.abspath(
-    os.path.join(
-        os.path.dirname(__file__),
-        "..",
-        ".."
-    )
-)
-
-if PROJECT_ROOT not in sys.path:
-    sys.path.insert(0, PROJECT_ROOT)
-
-
-# --------------------------------------------------
-# MEDIA GENERATORS
-# --------------------------------------------------
 
 from modules.media_generator.image.generator import generate_image
 from modules.media_generator.tts.generator import generate_tts
+from modules.media_generator.video.assembler import assemble_video
 
 
-# --------------------------------------------------
-# OUTPUT DIRECTORY
-# --------------------------------------------------
+# ================================================================
+# CONFIGURATION
+# ================================================================
 
-OUTPUT_DIR = os.path.join(
-    PROJECT_ROOT,
-    "modules",
-    "media_generator",
-    "output"
-)
+OUTPUT_DIR = "modules/media_generator/output"
+
+DEFAULT_WIDTH = 1280
+DEFAULT_HEIGHT = 720
+DEFAULT_FPS = 24
 
 
-# --------------------------------------------------
-# GENERATE SCENE MEDIA
-# --------------------------------------------------
+# ================================================================
+# MEDIA PIPELINE
+# ================================================================
 
-def generate_scene_media(scene_id, image_prompt, narration_text):
+def generate_scene_media(scene):
     """
-    Generate all media required for a single educational
-    video scene.
+    Generate image and narration for one scene.
 
-    Parameters:
-        scene_id (int or str):
-            Unique identifier for the scene.
+    Expected scene format:
 
-        image_prompt (str):
-            Prompt used for image generation.
-
-        narration_text (str):
-            Text used for speech generation.
+    {
+        "scene_id": 1,
+        "text": "...",
+        "image_prompt": "..."
+    }
 
     Returns:
-        dict:
-            Paths of generated image and audio files.
+
+    {
+        "scene_id": 1,
+        "image": "...",
+        "audio": "..."
+    }
     """
 
-    print("\n" + "=" * 60)
-    print(f"Generating media for Scene {scene_id}")
+    scene_id = scene["scene_id"]
+    text = scene["text"]
+    image_prompt = scene["image_prompt"]
+
+    print()
+    print("=" * 60)
+    print(f"GENERATING MEDIA FOR SCENE {scene_id}")
     print("=" * 60)
 
-    # --------------------------------------------------
-    # SCENE OUTPUT DIRECTORY
-    # --------------------------------------------------
+    # ------------------------------------------------------------
+    # Scene output directory
+    # ------------------------------------------------------------
 
     scene_dir = os.path.join(
         OUTPUT_DIR,
@@ -80,83 +64,268 @@ def generate_scene_media(scene_id, image_prompt, narration_text):
         exist_ok=True
     )
 
-    # --------------------------------------------------
-    # IMAGE GENERATION
-    # --------------------------------------------------
-
     image_path = os.path.join(
         scene_dir,
         "image.png"
     )
-
-    print("\n[1/2] Generating image...")
-
-    generate_image(
-        image_prompt,
-        image_path
-    )
-
-    # --------------------------------------------------
-    # TTS GENERATION
-    # --------------------------------------------------
 
     audio_path = os.path.join(
         scene_dir,
         "narration.wav"
     )
 
-    print("\n[2/2] Generating narration...")
+    # ------------------------------------------------------------
+    # Generate image
+    # ------------------------------------------------------------
 
-    generate_tts(
-        narration_text,
-        audio_path
+    print()
+    print(f"[1/2] Generating image for Scene {scene_id}...")
+    print(f"Prompt: {image_prompt}")
+
+    generated_image = generate_image(
+        prompt=image_prompt,
+        output_path=image_path
     )
 
-    # --------------------------------------------------
-    # RESULT
-    # --------------------------------------------------
+    print()
+    print(f"Image generated:")
+    print(generated_image)
 
-    result = {
+    # ------------------------------------------------------------
+    # Generate narration
+    # ------------------------------------------------------------
+
+    print()
+    print(f"[2/2] Generating narration for Scene {scene_id}...")
+    print(f"Text: {text}")
+
+    generated_audio = generate_tts(
+        text=text,
+        output_path=audio_path
+    )
+
+    print()
+    print(f"Audio generated:")
+    print(generated_audio)
+
+    # ------------------------------------------------------------
+    # Validate generated files
+    # ------------------------------------------------------------
+
+    if not os.path.exists(image_path):
+        raise FileNotFoundError(
+            f"Image generation failed for Scene {scene_id}: "
+            f"{image_path}"
+        )
+
+    if not os.path.exists(audio_path):
+        raise FileNotFoundError(
+            f"TTS generation failed for Scene {scene_id}: "
+            f"{audio_path}"
+        )
+
+    print()
+    print(f"Scene {scene_id} media generated successfully!")
+
+    return {
         "scene_id": scene_id,
         "image": image_path,
         "audio": audio_path
     }
 
-    print("\n" + "=" * 60)
-    print(f"Scene {scene_id} media generated successfully!")
+
+# ================================================================
+# FULL MEDIA PIPELINE
+# ================================================================
+
+def generate_video(scenes):
+    """
+    Generate complete video from multiple scenes.
+
+    Each scene must contain:
+
+    {
+        "scene_id": int,
+        "text": str,
+        "image_prompt": str
+    }
+
+    Returns:
+        Path to final video.
+    """
+
+    if not scenes:
+        raise ValueError(
+            "No scenes provided to media pipeline."
+        )
+
+    print()
+    print("=" * 60)
+    print("AI EDUCATIONAL VIDEO - MEDIA PIPELINE")
     print("=" * 60)
 
-    print("Image :", image_path)
-    print("Audio :", audio_path)
+    print(f"Number of scenes: {len(scenes)}")
+    print()
 
-    return result
+    generated_scenes = []
+
+    # ------------------------------------------------------------
+    # Generate media for every scene
+    # ------------------------------------------------------------
+
+    for index, scene in enumerate(
+        scenes,
+        start=1
+    ):
+
+        print()
+        print("=" * 60)
+        print(
+            f"[{index}/{len(scenes)}] "
+            f"PROCESSING SCENE {scene['scene_id']}"
+        )
+        print("=" * 60)
+
+        result = generate_scene_media(
+            scene
+        )
+
+        generated_scenes.append(
+            result
+        )
+
+    # ------------------------------------------------------------
+    # Create video output directory
+    # ------------------------------------------------------------
+
+    video_dir = os.path.join(
+        OUTPUT_DIR,
+        "videos"
+    )
+
+    os.makedirs(
+        video_dir,
+        exist_ok=True
+    )
+
+    final_video_path = os.path.join(
+        video_dir,
+        "final_video.mp4"
+    )
+
+    # ------------------------------------------------------------
+    # Assemble video
+    # ------------------------------------------------------------
+
+    print()
+    print("=" * 60)
+    print("ASSEMBLING FINAL VIDEO")
+    print("=" * 60)
+
+    print(
+        f"Scenes ready for assembly: "
+        f"{len(generated_scenes)}"
+    )
+
+    final_video = assemble_video(
+        scenes=generated_scenes,
+        output_path=final_video_path,
+        width=DEFAULT_WIDTH,
+        height=DEFAULT_HEIGHT,
+        fps=DEFAULT_FPS
+    )
+
+    # ------------------------------------------------------------
+    # Final validation
+    # ------------------------------------------------------------
+
+    if not os.path.exists(final_video):
+        raise FileNotFoundError(
+            "Final video was not generated."
+        )
+
+    print()
+    print("=" * 60)
+    print("COMPLETE MEDIA PIPELINE SUCCESSFUL!")
+    print("=" * 60)
+
+    print(
+        f"Final video: {final_video}"
+    )
+
+    print("=" * 60)
+
+    return final_video
 
 
-# --------------------------------------------------
+# ================================================================
 # TEST
-# --------------------------------------------------
+# ================================================================
 
 if __name__ == "__main__":
 
-    test_scene_id = 1
+    print()
+    print("=" * 60)
+    print("TESTING COMPLETE MEDIA PIPELINE")
+    print("=" * 60)
 
-    test_image_prompt = (
-        "A clean educational illustration of the solar system, "
-        "planets arranged around the Sun, scientific textbook style, "
-        "clear labels, clean composition, educational diagram"
-    )
+    test_scenes = [
 
-    test_narration = (
-        "The solar system consists of the Sun and all the objects "
-        "that orbit around it. These include eight planets, dwarf "
-        "planets, moons, asteroids, and comets."
-    )
+        {
+            "scene_id": 1,
 
-    result = generate_scene_media(
-        test_scene_id,
-        test_image_prompt,
-        test_narration
-    )
+            "text": (
+                "The solar system consists of the Sun "
+                "and all the objects that orbit around it."
+            ),
 
-    print("\nFinal result:")
-    print(result)
+            "image_prompt": (
+                "A clean educational illustration of "
+                "the solar system, planets arranged "
+                "around the Sun, scientific textbook "
+                "style, clear labels, clean composition, "
+                "educational diagram"
+            )
+        },
+
+        {
+            "scene_id": 2,
+
+            "text": (
+                "The solar system contains eight planets "
+                "that orbit the Sun in predictable paths."
+            ),
+
+            "image_prompt": (
+                "A clean educational illustration showing "
+                "the eight planets orbiting the Sun, "
+                "scientific textbook diagram, labeled "
+                "planets, clear educational composition"
+            )
+        }
+
+    ]
+
+    try:
+
+        result = generate_video(
+            test_scenes
+        )
+
+        print()
+        print("=" * 60)
+        print("TEST COMPLETED SUCCESSFULLY")
+        print("=" * 60)
+        print(f"Video: {result}")
+        print("=" * 60)
+
+    except Exception as error:
+
+        print()
+        print("=" * 60)
+        print("MEDIA PIPELINE FAILED")
+        print("=" * 60)
+        print(f"Error: {error}")
+        print("=" * 60)
+
+        raise
