@@ -25,3 +25,21 @@ __pycache__/
 # OS files
 .DS_Store
 Thumbs.db
+
+# Media generator environment
+.env
+
+# Generated media
+output/
+*.png
+*.jpg
+*.jpeg
+*.wav
+*.mp3
+*.mp4
+
+# AI model weights
+*.safetensors
+*.ckpt
+*.pth
+*.bin
