@@ -7,11 +7,7 @@ from diffusers import StableDiffusionPipeline
 # LOCAL MODEL CONFIGURATION
 # ============================================================
 
-MODEL_PATH = (
-    r"C:\Users\DEMEERA\.cache\huggingface\hub"
-    r"\models--runwayml--stable-diffusion-v1-5"
-    r"\snapshots\451f4fe16113bff5a5d2269ed5ad43b0592e9a14"
-)
+MODEL_ID = "runwayml/stable-diffusion-v1-5"
 
 
 # Keep the model loaded in memory after the first load.
@@ -34,35 +30,27 @@ def load_pipeline():
 
     global _pipeline, _device
 
-    # If the model is already loaded, reuse it.
     if _pipeline is not None:
         return _pipeline, _device
 
-    # Detect GPU automatically.
     _device = "cuda" if torch.cuda.is_available() else "cpu"
 
     print("Device:", _device)
-    print("Loading image-generation model locally...")
-    print("Model path:", MODEL_PATH)
+    print("Loading image-generation model...")
 
-    # Use FP16 on NVIDIA GPU.
-    # Use FP32 on CPU.
+    print("Model:", MODEL_ID)
+
     dtype = (
         torch.float16
         if _device == "cuda"
         else torch.float32
     )
 
-    # Load ONLY from the local cache.
-    # This prevents Hugging Face from trying to download
-    # the model again.
     _pipeline = StableDiffusionPipeline.from_pretrained(
-        MODEL_PATH,
-        torch_dtype=dtype,
-        local_files_only=True
+        MODEL_ID,
+        torch_dtype=dtype
     )
 
-    # Move the model to GPU or CPU.
     _pipeline = _pipeline.to(_device)
 
     print("Model loaded successfully.")
