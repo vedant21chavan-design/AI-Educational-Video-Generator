@@ -7,7 +7,11 @@ from diffusers import StableDiffusionPipeline
 # LOCAL MODEL CONFIGURATION
 # ============================================================
 
-MODEL_ID = "runwayml/stable-diffusion-v1-5"
+MODEL_PATH = (
+    r"C:\Users\DEMEERA\.cache\huggingface\hub"
+    r"\models--runwayml--stable-diffusion-v1-5"
+    r"\snapshots\451f4fe16113bff5a5d2269ed5ad43b0592e9a14"
+)
 
 
 # Keep the model loaded in memory after the first load.
@@ -38,7 +42,7 @@ def load_pipeline():
     print("Device:", _device)
     print("Loading image-generation model...")
 
-    print("Model:", MODEL_ID)
+    print("Model path:", MODEL_PATH)
 
     dtype = (
         torch.float16
@@ -47,8 +51,9 @@ def load_pipeline():
     )
 
     _pipeline = StableDiffusionPipeline.from_pretrained(
-        MODEL_ID,
-        torch_dtype=dtype
+    MODEL_PATH,
+    torch_dtype=dtype,
+    local_files_only=True
     )
 
     _pipeline = _pipeline.to(_device)
