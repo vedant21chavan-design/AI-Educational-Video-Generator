@@ -1,0 +1,2 @@
+Member_Domain_Classification/science_domain_model/model.safetensors filter=lfs diff=lfs merge=lfs -text
+Member1_Domain_classification/science_domain_model/model.safetensors filter=lfs diff=lfs merge=lfs -text
