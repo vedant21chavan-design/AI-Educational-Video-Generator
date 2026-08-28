@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI Educational Video Generator</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <main class="page-shell">
+    <section class="hero" aria-labelledby="page-title">
+      <p class="eyebrow"><span class="pulse-dot"></span> AI-powered learning studio</p>
+      <h1 id="page-title">Turn a topic into a<br /><span>teaching video.</span></h1>
+      <p class="hero-copy">Enter an educational topic and we’ll build your video in the background. Preview and download it as soon as it’s ready.</p>
+    </section>
+
+    <section class="generator-card" aria-label="Video generator">
+      <form id="generate-form" novalidate>
+        <label for="topic">What would you like to teach?</label>
+        <div class="input-row">
+          <input id="topic" name="topic" type="text" maxlength="180" placeholder="e.g. Chemical Bonding" autocomplete="off" required />
+          <button id="generate-button" type="submit">
+            <span class="button-text">Generate video</span>
+            <span class="button-spinner" aria-hidden="true"></span>
+            <span aria-hidden="true">→</span>
+          </button>
+        </div>
+        <p class="input-note">Your video may take a moment to compose. Keep this page open while we check its progress.</p>
+      </form>
+
+      <section id="job-panel" class="job-panel" hidden aria-live="polite">
+        <div class="status-header">
+          <div>
+            <p class="section-label">Generation status</p>
+            <h2 id="status-title">Preparing your video</h2>
+          </div>
+          <span id="status-badge" class="status-badge processing">Processing</span>
+        </div>
+        <div class="progress-track" role="progressbar" aria-label="Video generation progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="35">
+          <div id="progress-bar" class="progress-bar"></div>
+        </div>
+        <p id="status-message" class="status-message">Your scenes, images, and narration are being composed.</p>
+        <p id="job-id" class="job-id"></p>
+      </section>
+
+      <section id="video-panel" class="video-panel" hidden>
+        <div class="video-heading">
+          <div>
+            <p class="section-label">Your lesson is ready</p>
+            <h2>Watch your generated video</h2>
+          </div>
+          <a id="download-link" class="download-link" href="#" download>
+            <span aria-hidden="true">↓</span> Download MP4
+          </a>
+        </div>
+        <video id="video-player" controls preload="metadata" playsinline>
+          Your browser does not support video playback.
+        </video>
+      </section>
+    </section>
+
+    <p class="footer-note">Built for clear, engaging educational content.</p>
+  </main>
+  <div id="toast" class="toast" role="alert" aria-live="assertive"></div>
+  <script src="script.js"></script>
+</body>
+</html>
