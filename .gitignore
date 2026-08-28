@@ -21,6 +21,10 @@ __pycache__/
 # Temporary files
 *.tmp
 *.log
+*TEMP_MPY*
+
+# Generated video outputs
+*.mp4
 
 # OS files
 .DS_Store
