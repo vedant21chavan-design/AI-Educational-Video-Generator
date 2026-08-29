@@ -3,7 +3,9 @@ import torch
 from transformers import AutoTokenizer, AutoModelForSequenceClassification
 
 # Path to the trained model
-MODEL_PATH = "/content/drive/MyDrive/ScienceQA_Project/Member1_Domain_Classifier/science_domain_model"
+from pathlib import Path
+
+MODEL_PATH = Path(__file__).resolve().parent / "science_domain_model"
 
 # Label mapping used by the trained model
 ID2LABEL = {
