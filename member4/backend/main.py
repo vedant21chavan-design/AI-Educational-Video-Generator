@@ -1,24 +1,31 @@
-from fastapi import FastAPI, BackgroundTasks
+from fastapi import FastAPI, BackgroundTasks, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from pydantic import BaseModel
+from pathlib import Path
+import sys
 import uuid
 
-from video_composer import (
-    load_vgp,
-    get_scenes,
+# Resolve project files independently of the directory used to start Uvicorn.
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(PROJECT_ROOT))
+
+from member4.video_composer import (
     get_scene_durations,
-    get_scene_images,
-    get_scene_audio,
     create_video
 )
+from modules.media_generator import media_pipeline
 
 
 # -----------------------------
 # Configuration
 # -----------------------------
 
-VGP_PATH = "../output/JOB_010_vgp.json"
+ASSETS_DIR = PROJECT_ROOT / "assets"
+
+# Member 3's pipeline uses this module setting to decide where to save the
+# PNG and WAV files.  Make it an absolute project path for a reliable handoff.
+media_pipeline.ASSETS_DIR = str(ASSETS_DIR)
 
 
 # In-memory job storage
@@ -58,15 +65,35 @@ class GenerateRequest(BaseModel):
 # Prepare Video Data
 # -----------------------------
 
-def prepare_video_data():
-    vgp = load_vgp(VGP_PATH)
+def convert_vgp_scenes_for_member3(scenes):
+    """Map Member 2's VGP schema to Member 3's media-pipeline schema."""
+    return [
+        {
+            "scene_id": scene["scene_id"],
+            "text": scene["narration"],
+            "image_prompt": scene["visual_prompt"],
+            "duration": scene["duration"],
+        }
+        for scene in scenes
+    ]
 
-    scenes = get_scenes(vgp)
-    durations = get_scene_durations(scenes)
-    images = get_scene_images(vgp["job_id"], scenes)
-    audio_paths = get_scene_audio(vgp["job_id"], scenes)
 
-    return images, audio_paths, durations
+def create_vgp_for_topic(job_id, topic):
+    """Run Member 1 and Member 2 for the topic submitted by the frontend."""
+    # These imports are intentionally lazy: they keep the Member 4 API running
+    # even when a teammate's local model or LLM dependency is unavailable.
+    from Member1_Domain_Classification.classifier import classify_topic
+    from member2.decomposer.pipeline import process_topic
+
+    domain, confidence = classify_topic(topic)
+    packet = process_topic(
+        job_id=job_id,
+        topic=topic,
+        domain=domain,
+        confidence=confidence,
+    )
+
+    return packet.model_dump()
 
 
 # -----------------------------
@@ -75,44 +102,44 @@ def prepare_video_data():
 
 def run_video_generation(job_id, topic):
     try:
-        jobs[job_id]["status"] = "PROCESSING"
+        jobs[job_id]["status"] = "CLASSIFYING"
+        vgp = create_vgp_for_topic(job_id, topic)
 
-        output_path = f"assets/JOB_010/{job_id}.mp4"
+        if vgp["status"] != "COMPLETED":
+            errors = "; ".join(vgp.get("errors", []))
+            raise RuntimeError(errors or "Member 2 could not create a scene plan.")
 
-        images, audio_paths, durations = prepare_video_data()
+        jobs[job_id]["status"] = "GENERATING_MEDIA"
+        scenes = vgp["scenes"]
+        generated_media = media_pipeline.generate_video(
+            job_id,
+            convert_vgp_scenes_for_member3(scenes),
+        )
+
+        images = [scene["image"] for scene in generated_media["scenes"]]
+        audio_paths = [scene["audio"] for scene in generated_media["scenes"]]
+        durations = get_scene_durations(scenes)
+
+        jobs[job_id]["status"] = "COMPOSING_VIDEO"
+        output_directory = ASSETS_DIR / job_id
+        output_directory.mkdir(parents=True, exist_ok=True)
+        output_path = output_directory / f"{job_id}.mp4"
 
         create_video(
             images,
             audio_paths,
             durations,
-            output_path
+            str(output_path)
         )
 
         jobs[job_id]["status"] = "COMPLETED"
-        jobs[job_id]["video_path"] = output_path
+        jobs[job_id]["video_path"] = str(output_path)
+        jobs[job_id]["domain"] = vgp["domain"]
+        jobs[job_id]["scene_count"] = len(scenes)
 
     except Exception as e:
         jobs[job_id]["status"] = "FAILED"
         jobs[job_id]["error"] = str(e)
-
-
-# -----------------------------
-# Test Video Generation
-# -----------------------------
-
-def generate_test_video():
-    images, audio_paths, durations = prepare_video_data()
-
-    output_path = "assets/JOB_010/backend_test_video.mp4"
-
-    create_video(
-        images,
-        audio_paths,
-        durations,
-        output_path
-    )
-
-    return output_path
 
 
 # -----------------------------
@@ -135,26 +162,30 @@ def generate_video(
     request: GenerateRequest,
     background_tasks: BackgroundTasks
 ):
+    topic = request.topic.strip()
+    if not topic:
+        raise HTTPException(status_code=400, detail="A topic is required.")
+
     job_id = str(uuid.uuid4())
 
     # Create initial job record
     jobs[job_id] = {
         "status": "PROCESSING",
-        "topic": request.topic
+        "topic": topic
     }
 
     # Start video generation in background
     background_tasks.add_task(
         run_video_generation,
         job_id,
-        request.topic
+        topic
     )
 
     # Return immediately
     return {
         "job_id": job_id,
         "status": "PROCESSING",
-        "topic": request.topic
+        "topic": topic
     }
 
 
@@ -179,17 +210,15 @@ def get_status(job_id: str):
 @app.get("/video/{job_id}")
 def get_video(job_id: str):
 
-    video_path = f"assets/JOB_010/{job_id}.mp4"
+    video_path = ASSETS_DIR / job_id / f"{job_id}.mp4"
 
-    import os
-
-    if not os.path.exists(video_path):
+    if not video_path.exists():
         return {
             "error": "Video not found"
         }
 
     return FileResponse(
-        video_path,
+        str(video_path),
         media_type="video/mp4",
         filename=f"{job_id}.mp4"
     )
@@ -200,12 +229,7 @@ def get_video(job_id: str):
 
 @app.get("/vgp")
 def get_vgp():
-
-    vgp = load_vgp(VGP_PATH)
-
     return {
-        "job_id": vgp["job_id"],
-        "topic": vgp["topic"],
-        "domain": vgp["domain"],
-        "scene_count": len(vgp["scenes"])
+        "message": "VGPs are created dynamically for each generation request.",
+        "active_jobs": len(jobs)
     }

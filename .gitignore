@@ -29,26 +29,3 @@ __pycache__/
 # OS files
 .DS_Store
 Thumbs.db
-
-# Virtual environments
-venv/
-.venv/
-
-# Environment variables / secrets
-.env
-
-# Media generator output
-modules/media_generator/output/
-
-# Generated media
-*.png
-*.jpg
-*.jpeg
-*.wav
-*.mp3
-*.mp4
-
-# AI model weights
-*.safetensors
-*.ckpt
-*.pth
