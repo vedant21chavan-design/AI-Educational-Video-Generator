@@ -2,7 +2,7 @@ from member2.input_adapter import load_member1_input
 
 
 data = load_member1_input(
-    "input/JOB_010_input.json"
+    "Member1_Domain_Classification/JOB_010_output.json"
 )
 
 
