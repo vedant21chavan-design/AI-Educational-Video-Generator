@@ -40,7 +40,7 @@ form.addEventListener("submit", async (event) => {
 
     const data = await response.json();
     jobIdText.textContent = `Job ID: ${data.job_id}`;
-    updateJobPanel("PROCESSING", data.job_id, "Your scenes, images, and narration are being composed.");
+    updateJobPanel("PROCESSING", data.job_id, "Classifying your topic and preparing its lesson plan.");
     pollJobStatus(data.job_id);
     pollTimer = setInterval(() => pollJobStatus(data.job_id), POLL_INTERVAL_MS);
   } catch (error) {
@@ -72,7 +72,13 @@ async function pollJobStatus(jobId) {
       setButtonLoading(false);
       showToast(data.error || "Video generation failed.", true);
     } else {
-      updateJobPanel("PROCESSING", jobId, "Your scenes, images, and narration are being composed.");
+      const messages = {
+        CLASSIFYING: "Classifying your topic.",
+        CREATING_SCENES: "Creating the lesson scenes.",
+        GENERATING_MEDIA: "Generating scene images and narration.",
+        COMPOSING_VIDEO: "Composing your final video."
+      };
+      updateJobPanel("PROCESSING", jobId, messages[status] || "Preparing your video.");
     }
   } catch (error) {
     clearInterval(pollTimer);
