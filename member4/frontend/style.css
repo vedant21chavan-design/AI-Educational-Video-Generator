@@ -36,6 +36,9 @@ button { display: inline-flex; min-width: 185px; align-items: center; justify-co
 button:hover:not(:disabled) { background: var(--primary-dark); transform: translateY(-1px); }
 button:disabled { cursor: not-allowed; opacity: .72; }
 .input-note { margin: 11px 0 0; color: var(--muted); font-size: .84rem; }
+.duration-row { display: flex; align-items: center; gap: 10px; margin-top: 12px; }
+.duration-row label { font-size: .84rem; color: var(--muted); }
+.duration-row select { padding: 8px 12px; border-radius: 8px; border: 1px solid var(--border, #ddd); font-size: .9rem; background: #fff; }
 .button-spinner { display: none; width: 17px; height: 17px; border: 2px solid rgba(255,255,255,.35); border-top-color: #fff; border-radius: 50%; animation: spin .75s linear infinite; }
 button.loading .button-spinner { display: inline-block; } button.loading > [aria-hidden="true"]:last-child { display: none; }
 .job-panel, .video-panel { margin-top: 30px; padding-top: 29px; border-top: 1px solid var(--line); }

@@ -14,10 +14,13 @@ def generate_content(prompt: str) -> str:
         "format": "json"
     }
 
+    # 60s was tuned for GPU inference. Running on CPU (e.g. as a fallback
+    # when the GPU/driver can't run Ollama) is much slower, especially with
+    # longer prompts, so give it more headroom before calling it a timeout.
     response = requests.post(
         OLLAMA_URL,
         json=data,
-        timeout=60
+        timeout=180
     )
 
     response.raise_for_status()

@@ -1,6 +1,12 @@
 from member2.vgp.states import VGPStatus
 from member2.vgp.schema import VGP
+from member2.decomposer.duration_presets import PRESETS
 
+
+# Largest scene_count any duration preset asks for, plus the +1 tolerance
+# decomposer.py already allows around its target - keeps this in sync with
+# member2/decomposer/duration_presets.py instead of a stale fixed number.
+MAX_SCENES = max(preset["scene_count"] for preset in PRESETS.values()) + 1
 
 ALLOWED_STATES = {
     "CREATED",
@@ -37,9 +43,9 @@ def validate_vgp(packet: VGP) -> bool:
             "At least one scene is required"
         )
 
-    if len(packet.scenes) > 6:
+    if len(packet.scenes) > MAX_SCENES:
         raise ValueError(
-            "Maximum 6 scenes are allowed"
+            f"Maximum {MAX_SCENES} scenes are allowed"
         )
 
     # Check domain

@@ -1,4 +1,5 @@
 from member2.decomposer.decomposer import decompose_topic
+from member2.decomposer.duration_presets import get_preset, words_per_scene
 from member2.vgp.schema import VGP
 from member2.vgp.validator import validate_vgp
 from member2.vgp.states import VGPStatus
@@ -11,7 +12,8 @@ def process_topic(
     job_id: str,
     topic: str,
     domain: str,
-    confidence: float
+    confidence: float,
+    duration_preset: str = "medium"
 ):
 
     # 1. Create VGP
@@ -23,6 +25,14 @@ def process_topic(
     )
 
     print("VGP CREATED")
+
+    preset = get_preset(duration_preset)
+    scene_count = preset["scene_count"]
+    scene_word_budget = words_per_scene(preset)
+    print(
+        f"Target length: {preset['label']} "
+        f"({scene_count} scenes, ~{scene_word_budget} words/scene narration)"
+    )
 
     # 2. Move to processing
     packet.change_status(VGPStatus.VALIDATED)
@@ -42,7 +52,9 @@ def process_topic(
         )
         scenes = decompose_topic(
             topic,
-            domain
+            domain,
+            scene_count=scene_count,
+            words_per_scene=scene_word_budget
         )
         break
      except Timeout:
