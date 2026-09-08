@@ -1,7 +1,15 @@
 import os
 
 from modules.media_generator.image.generator import generate_image
+from modules.media_generator.image.diagram_generator import generate_diagram
 from modules.media_generator.tts.generator import generate_tts
+
+# Domains routed to the local matplotlib diagram generator instead of
+# Stable Diffusion. Stable Diffusion handles Biology/Chemistry/Earth
+# Science reasonably well (real, photographable subjects) but produces
+# vague or garbled results for Physics/Astronomy concepts (forces, orbits,
+# black holes, etc.), which have no clean photographic reference.
+DIAGRAM_DOMAINS = {"Physics"}
 
 
 # ================================================================
@@ -15,7 +23,7 @@ ASSETS_DIR = "assets"
 # SCENE MEDIA GENERATION
 # ================================================================
 
-def generate_scene_media(job_id, scene):
+def generate_scene_media(job_id, scene, domain=None):
     """
     Generate image and narration for one scene.
 
@@ -135,10 +143,20 @@ def generate_scene_media(job_id, scene):
         f"Prompt: {image_prompt}"
     )
 
-    generated_image = generate_image(
-        prompt=image_prompt,
-        output_path=image_path
-    )
+    if domain in DIAGRAM_DOMAINS:
+        print(f"Domain '{domain}' routed to diagram generator (not Stable Diffusion).")
+        generated_image = generate_diagram(
+            title=scene.get("title", text[:60]),
+            narration=text,
+            visual_prompt=image_prompt,
+            output_path=image_path
+        )
+    else:
+        print(f"Domain '{domain}' using Stable Diffusion (generate_image).")
+        generated_image = generate_image(
+            prompt=image_prompt,
+            output_path=image_path
+        )
 
     print()
     print("Image generated:")
@@ -231,7 +249,7 @@ def generate_scene_media(job_id, scene):
 # JOB MEDIA GENERATION
 # ================================================================
 
-def generate_video(job_id, scenes):
+def generate_video(job_id, scenes, domain=None):
     """
     Generate all media assets for one VGP job.
 
@@ -344,7 +362,8 @@ def generate_video(job_id, scenes):
 
         result = generate_scene_media(
             job_id=job_id,
-            scene=scene
+            scene=scene,
+            domain=domain
         )
 
         generated_scenes.append(

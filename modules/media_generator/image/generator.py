@@ -1,6 +1,6 @@
 import os
 import torch
-from diffusers import StableDiffusionPipeline
+from diffusers import StableDiffusionPipeline, DPMSolverMultistepScheduler
 
 
 # ============================================================
@@ -12,6 +12,24 @@ MODEL_PATH = (
     r"\models--runwayml--stable-diffusion-v1-5"
     r"\snapshots\451f4fe16113bff5a5d2269ed5ad43b0592e9a14"
 )
+
+# Appended to every prompt to nudge Stable Diffusion toward sharper,
+# cleaner output instead of its default average.
+QUALITY_SUFFIX = ", detailed illustration, clean composition, high quality"
+
+# Told to Stable Diffusion as what to AVOID. This is one of the single
+# biggest levers for output quality on SD1.5 - without it, the model has
+# no signal steering it away from its common failure modes (blurry,
+# distorted anatomy, garbled text, watermarks, low detail).
+NEGATIVE_PROMPT = (
+    "blurry, low quality, low detail, distorted, deformed, disfigured, "
+    "extra limbs, mutated, watermark, signature, text, letters, words, "
+    "jpeg artifacts, grainy, out of frame, cropped"
+)
+
+# 20 steps was fast but left visible artifacts. 35 is still a couple of
+# seconds per image on a GPU but noticeably sharper and more coherent.
+NUM_INFERENCE_STEPS = 35
 
 
 # Keep the model loaded in memory after the first load.
@@ -56,6 +74,13 @@ def load_pipeline():
     local_files_only=True
     )
 
+    # DPM-Solver++ converges to a cleaner result in the same (or fewer)
+    # steps than SD1.5's default scheduler - a straightforward quality
+    # upgrade with no extra cost.
+    _pipeline.scheduler = DPMSolverMultistepScheduler.from_config(
+        _pipeline.scheduler.config
+    )
+
     _pipeline = _pipeline.to(_device)
 
     print("Model loaded successfully.")
@@ -86,17 +111,20 @@ def generate_image(prompt, output_path):
     # Load or reuse the model.
     pipe, device = load_pipeline()
 
+    full_prompt = prompt + QUALITY_SUFFIX
+
     print()
     print("Generating image...")
-    print("Prompt:", prompt)
+    print("Prompt:", full_prompt)
     print("Device:", device)
 
     # Generate image.
     image = pipe(
-        prompt,
+        full_prompt,
+        negative_prompt=NEGATIVE_PROMPT,
         height=512,
         width=512,
-        num_inference_steps=20
+        num_inference_steps=NUM_INFERENCE_STEPS
     ).images[0]
 
     # Create output directory if necessary.

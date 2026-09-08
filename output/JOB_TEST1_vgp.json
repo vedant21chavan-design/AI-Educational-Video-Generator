@@ -1,0 +1,46 @@
+{
+  "job_id": "JOB_TEST1",
+  "topic": "Photosynthesis",
+  "domain": "Biology",
+  "domain_confidence": 1.0,
+  "status": "COMPLETED",
+  "scenes": [
+    {
+      "scene_id": 1,
+      "title": "What is Photosynthesis?",
+      "explanation": "Photosynthesis is the process by which plants, algae, and some bacteria convert light energy from the sun into chemical energy in the form of glucose.",
+      "narration": "Photosynthesis is a vital process that sustains life on Earth.",
+      "visual_prompt": "A simple diagram of a plant with sunlight and water, surrounded by a green glow.",
+      "duration": 8
+    },
+    {
+      "scene_id": 2,
+      "title": "Light-Dependent Reactions",
+      "explanation": "The light-dependent reactions occur in the thylakoid membranes of the chloroplast and involve the absorption of light energy by pigments such as chlorophyll.",
+      "narration": "This stage converts light energy into ATP and NADPH.",
+      "visual_prompt": "An illustration of chlorophyll molecules absorbing light energy.",
+      "duration": 10
+    },
+    {
+      "scene_id": 3,
+      "title": "Calvin Cycle",
+      "explanation": "The Calvin cycle, also known as the light-independent reactions, occurs in the stroma of the chloroplast and uses ATP and NADPH to fix CO2 into glucose.",
+      "narration": "This stage produces glucose from CO2.",
+      "visual_prompt": "An animation of the Calvin cycle, with molecules moving and reacting.",
+      "duration": 12
+    },
+    {
+      "scene_id": 4,
+      "title": "Importance of Photosynthesis",
+      "explanation": "Photosynthesis is essential for life on Earth, as it provides oxygen and organic compounds for living organisms.",
+      "narration": "Photosynthesis supports the food chain and is crucial for human survival.",
+      "visual_prompt": "An illustration of a plant providing oxygen to an animal.",
+      "duration": 8
+    }
+  ],
+  "metadata": {
+    "language": "English",
+    "created_by": "Member2"
+  },
+  "errors": []
+}

@@ -3,6 +3,7 @@ const POLL_INTERVAL_MS = 4000;
 
 const form = document.querySelector("#generate-form");
 const topicInput = document.querySelector("#topic");
+const durationPresetSelect = document.querySelector("#duration-preset");
 const generateButton = document.querySelector("#generate-button");
 const jobPanel = document.querySelector("#job-panel");
 const videoPanel = document.querySelector("#video-panel");
@@ -34,7 +35,10 @@ form.addEventListener("submit", async (event) => {
     const response = await fetch(`${API_URL}/generate`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ topic })
+      body: JSON.stringify({
+        topic,
+        duration_preset: durationPresetSelect ? durationPresetSelect.value : "medium"
+      })
     });
     if (!response.ok) throw new Error("The server could not start the video job.");
 

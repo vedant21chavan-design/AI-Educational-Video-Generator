@@ -3,6 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from pydantic import BaseModel
 from pathlib import Path
+import json
 import sys
 import uuid
 
@@ -59,6 +60,7 @@ app.add_middleware(
 
 class GenerateRequest(BaseModel):
     topic: str
+    duration_preset: str = "medium"  # "short" | "medium" | "long"
 
 
 # -----------------------------
@@ -73,24 +75,81 @@ def convert_vgp_scenes_for_member3(scenes):
             "text": scene["narration"],
             "image_prompt": scene["visual_prompt"],
             "duration": scene["duration"],
+            "title": scene["title"],
         }
         for scene in scenes
     ]
 
 
-def create_vgp_for_topic(job_id, topic):
+# Member 1's classifier is a closed 4-class model (Biology / Chemistry /
+# Earth Science / Physics): given ANY input, softmax always picks one of
+# those four with high confidence, even for topics that are not science at
+# all (e.g. "chocolate cake recipe"). It has no way to say "none of the
+# above". This gate asks the local LLM a direct yes/no question first, so
+# clearly out-of-scope topics are rejected instead of silently producing a
+# video for them.
+TOPIC_GATE_PROMPT = """
+You are a strict topic-relevance checker for an educational video generator.
+
+The generator can ONLY produce videos for school-level science topics that
+fall inside these four domains: Biology, Chemistry, Earth Science, Physics.
+
+Decide whether the given topic clearly belongs to one of those four domains.
+Topics about cooking, sports, coding, history, celebrities, finance, general
+small talk, gibberish, or any other non-science subject must be marked as
+NOT supported, even if they mention a scientific-sounding word in passing.
+
+Return ONLY valid JSON in exactly one of these two forms, with no other
+text and no Markdown:
+
+{"supported": true}
+{"supported": false}
+"""
+
+
+def is_supported_science_topic(topic: str) -> bool:
+    """Ask the local LLM whether `topic` is in-scope before we spend time
+    classifying and generating media for it."""
+    from member2.decomposer.llm import generate_content
+
+    prompt = f"{TOPIC_GATE_PROMPT}\nTopic:\n{topic}\n"
+
+    try:
+        response = generate_content(prompt)
+        data = json.loads(response)
+        return bool(data.get("supported", False))
+    except Exception:
+        # If the gate itself fails (Ollama unreachable, malformed JSON,
+        # etc.) fail OPEN: an infrastructure hiccup here shouldn't block a
+        # legitimate topic. The domain classifier still runs normally after.
+        return True
+
+
+def create_vgp_for_topic(job_id, topic, duration_preset="medium"):
     """Run Member 1 and Member 2 for the topic submitted by the frontend."""
     # These imports are intentionally lazy: they keep the Member 4 API running
     # even when a teammate's local model or LLM dependency is unavailable.
     from Member1_Domain_Classification.classifier import classify_topic
     from member2.decomposer.pipeline import process_topic
 
+    if not is_supported_science_topic(topic):
+        raise ValueError(
+            f"'{topic}' does not look like a Biology, Chemistry, Earth "
+            f"Science, or Physics topic. This generator only supports "
+            f"those four science domains."
+        )
+
     domain, confidence = classify_topic(topic)
+    print(
+        f"[Member 1] Topic '{topic}' classified as domain={domain!r} "
+        f"confidence={confidence:.4f}"
+    )
     packet = process_topic(
         job_id=job_id,
         topic=topic,
         domain=domain,
         confidence=confidence,
+        duration_preset=duration_preset,
     )
 
     return packet.model_dump()
@@ -100,10 +159,10 @@ def create_vgp_for_topic(job_id, topic):
 # Background Video Generation
 # -----------------------------
 
-def run_video_generation(job_id, topic):
+def run_video_generation(job_id, topic, duration_preset="medium"):
     try:
         jobs[job_id]["status"] = "CLASSIFYING"
-        vgp = create_vgp_for_topic(job_id, topic)
+        vgp = create_vgp_for_topic(job_id, topic, duration_preset=duration_preset)
 
         if vgp["status"] != "COMPLETED":
             errors = "; ".join(vgp.get("errors", []))
@@ -114,11 +173,16 @@ def run_video_generation(job_id, topic):
         generated_media = media_pipeline.generate_video(
             job_id,
             convert_vgp_scenes_for_member3(scenes),
+            domain=vgp["domain"],
         )
 
         images = [scene["image"] for scene in generated_media["scenes"]]
         audio_paths = [scene["audio"] for scene in generated_media["scenes"]]
         durations = get_scene_durations(scenes)
+        # Burn each scene's narration onto the video as a caption overlay,
+        # since Stable Diffusion cannot render legible text into the image
+        # itself.
+        captions = [scene["narration"] for scene in scenes]
 
         jobs[job_id]["status"] = "COMPOSING_VIDEO"
         output_directory = ASSETS_DIR / job_id
@@ -129,7 +193,8 @@ def run_video_generation(job_id, topic):
             images,
             audio_paths,
             durations,
-            str(output_path)
+            str(output_path),
+            captions=captions,
         )
 
         jobs[job_id]["status"] = "COMPLETED"
@@ -178,7 +243,8 @@ def generate_video(
     background_tasks.add_task(
         run_video_generation,
         job_id,
-        topic
+        topic,
+        request.duration_preset
     )
 
     # Return immediately

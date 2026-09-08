@@ -11,7 +11,7 @@ print("====================================\n")
 topic = input("Enter educational topic: ").strip()
 
 domain = input(
-    "Enter domain (Physics/Chemistry/Biology/Astronomy): "
+    "Enter domain (Physics/Chemistry/Biology/Earth Science): "
 ).strip()
 
 job_id = input(
